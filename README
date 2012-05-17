@@ -1,1 +1,1 @@
-Usage: pyrf.py <mediafire/rapidshare link>
+Usage: pyrf.py [-u login] [-p password] <mediafire/rapidshare link>

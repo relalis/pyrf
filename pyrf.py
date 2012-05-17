@@ -26,6 +26,7 @@ import urllib
 import subprocess
 import time
 import re
+import argparse
 
 def say(message):
 	sys.stdout.write('%s\n' % message)
@@ -55,7 +56,7 @@ def download(src, dest):
 	urllib.urlcleanup()
 	return filename
 	
-def rsdl(link):
+def rsdl(link, USER=None, PASS=None):
 	try:
 		rapidshare, files, fileid, filename = link.rsplit('/') [-4:]
 	except ValueError:
@@ -149,17 +150,21 @@ def mfdl(link):
 	downloaded_filename = download(address, filename)
 
 def main():
-	if len(sys.argv) < 2:
-		error("Usage: pyrf <link>");
-
-	file_link = sys.argv[1]
+	parser = argparse.ArgumentParser(description='Command-line Python Rapidshare and Mediafire downloader.')
+	parser.add_argument('file_url')
+	parser.add_argument('--user', '-u')
+	parser.add_argument('--password', '-p')
+	
+	USER = parser.parse_args().user
+	PASS = parser.parse_args().password
+	file_link = parser.parse_args().file_url
 	
 	#try:
 	#	rapidshare, files, fileid, filename = fille_link.rsplit('/')[-4:]
 	#except ValueError:
 	#	error('Invalid link')
 	if "rapidshare.com" in file_link:
-		rsdl(file_link)
+		rsdl(file_link, USER, PASS)
 	elif "mediafire.com" in file_link:
 		mfdl(file_link)
 	else:
