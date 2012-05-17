@@ -23,7 +23,6 @@ USSL = False
 import sys
 import os
 import urllib
-import subprocess
 import time
 import re
 import argparse
