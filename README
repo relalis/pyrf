@@ -1,4 +1,4 @@
-Usage: pyrf.py [-u login] [-p password] <mediafire/rapidshare link>
+Usage: pyrf.py [-u login] [-p password] <mediafire/rapidshare/hotfile link>
 
 Mediafire parser is slightly outdated, so don't expect me to fix it anytime soon.
 I said no.
