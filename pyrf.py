@@ -26,15 +26,13 @@ import urllib
 import time
 import re
 import argparse
+import md5
 
 def say(message):
-	sys.stdout.write('%s\n' % message)
-	sys.stdout.flush()
+	print message
 
 def error(message):
-	sys.stderr.write("%s\n" %message)
-	sys.stderr.flush()
-	sys.exit(1)
+	print 'ERROR: ' + message
 
 def progress(done, ind_size, size):
 	total = float((done * ind_size * 100) / size)
@@ -54,14 +52,17 @@ def download(src, dest):
 			filename = headers[a][headers[a].find('filename=') + 9:]
 	urllib.urlcleanup()
 	return filename
-	
+
+# Based on rsapiget by George Notaras
 def rsdl(link, USER=None, PASS=None):
 	try:
 		rapidshare, files, fileid, filename = link.rsplit('/') [-4:]
 	except ValueError:
 		error('Invalid Rapidshare link')
+		return
 	if not rapidshare.endswith('rapidshare.com') or files != 'files':
 		error('Invalid Rapidshare link')
+		return
 	if USSL:
 		proto = 'https'
 	else:
@@ -94,10 +95,12 @@ def rsdl(link, USER=None, PASS=None):
 		key, value = data.split(':')
 	except ValueError:
 		error(data)
+		return
 	try:
 		server, dlauth, countdown, remote_md5sum = value.split(',')
 	except ValueError:
 		error(data)
+		return
 	#free account wait
 	if int(countdown):
 		for t in range(int(countdown), 0, -1):
@@ -134,16 +137,35 @@ def mfdl(link):
 	say('Downloading: %s' % filename[0])
 	downloaded_filename = download(dlink, filename[0])
 
-def checkLink(link):
+def hfdl(link, USER=None, PASS=None):
+	apilink = 'http://api.hotfile.com/?action=getdirectdownloadlink'
+	if USER and PASS:
+		conn = urllib.urlopen(apilink + '&username=' + USER + '&password=' + PASS)
+		data = conn.read()
+		conn.close()
+		if "premium required" in data:
+			error('A premium account is required to download from hotfile.')
+			return
+		say('Downloading: %s' % filename)
+		downloaded_filename = download(data, filename)
+
+def checkLink(link, USER=None, PASS=None):
 	if "rapidshare.com" in link:
 		rsdl(link, USER, PASS)
 	elif "mediafire.com" in link:
 		mfdl(link)
+	elif "hotfile.com" in link:
+		if USER or PASS:
+			hfdl(link, USER, PASS)
+		else:
+			error('You need to enter a username and password for hotfile')
+			return
 	else:
 		error('Invalid or unsupported link')
+		return
 
 def main():
-	parser = argparse.ArgumentParser(description='Command-line Python Rapidshare and Mediafire downloader.')
+	parser = argparse.ArgumentParser(description='Command-line Python Rapidshare, Mediafire and Hotfile downloader.')
 	parser.add_argument('file_url')
 	parser.add_argument('--user', '-u')
 	parser.add_argument('--password', '-p')
@@ -158,12 +180,13 @@ def main():
 			f.seek(3)
 		file_list = list(f.readlines())
 		for item in file_list:
-			checkLink(item.strip('\n'))
+			checkLink(item.strip('\n'), USER, PASS)
 	else:
-		checkLink(file_link)
+		checkLink(file_link, USER, PASS)
 
 if __name__ == '__main__':
 	try:
 		main()
 	except KeyboardInterrupt:
 		error('\nAborted')
+		sys.exit(1)
