@@ -125,28 +125,14 @@ def rsdl(link, USER=None, PASS=None):
 	downloaded_filename = download(download_link, target_filename)
 
 def mfdl(link):
-	if "mediafire.com" in link:
-		conn = urllib.urlopen(link)
-		data = conn.read()
-		conn.close()
-	else:
-		error("Invalid Mediafire link.")
-	data = data.split("href=\"")
-	for i in data:
-		if "http://" in i and "\" onclick=\"avh(this);" in i:
-			s = i.index("\">")
-			dlink = i[:s]
-			try:
-				address, onclick = dlink.split('\"', 1)
-				filename = address.split('/')[5:]
-				filename = filename[0]
-				filename = filename.replace('+', ' ')
-				print filename
-				say('Downloading: %s' % filename)
-				downloaded_filename = download(address, filename)
-			except ValueError:
-				error(dlink)
-			break
+	conn = urllib.urlopen(link)
+	data = conn.read()
+	conn.close()
+	dlink = re.search("kNO = \"(.*)\";", data).group(0)
+	dlink = dlink[7:-2]
+	filename = dlink.split('/')[5:]
+	say('Downloading: %s' % filename[0])
+	downloaded_filename = download(dlink, filename[0])
 
 def checkLink(link):
 	if "rapidshare.com" in link:
