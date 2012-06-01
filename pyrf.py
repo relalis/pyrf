@@ -136,17 +136,25 @@ def mfdl(link):
 		if "http://" in i and "\" onclick=\"avh(this);" in i:
 			s = i.index("\">")
 			dlink = i[:s]
+			try:
+				address, onclick = dlink.split('\"', 1)
+				filename = address.split('/')[5:]
+				filename = filename[0]
+				filename = filename.replace('+', ' ')
+				print filename
+				say('Downloading: %s' % filename)
+				downloaded_filename = download(address, filename)
+			except ValueError:
+				error(dlink)
 			break
-	try:
-		address, onclick = dlink.split('\"', 1)
-	except ValueError:
-		error(dlink)
-	filename = address.split('/')[5:]
-	filename = filename[0]
-	filename = filename.replace('+', ' ')
-	print filename
-	say('Downloading: %s' % filename)
-	downloaded_filename = download(address, filename)
+
+def checkLink(link):
+	if "rapidshare.com" in link:
+		rsdl(link, USER, PASS)
+	elif "mediafire.com" in link:
+		mfdl(link)
+	else:
+		error('Invalid or unsupported link')
 
 def main():
 	parser = argparse.ArgumentParser(description='Command-line Python Rapidshare and Mediafire downloader.')
@@ -157,17 +165,16 @@ def main():
 	USER = parser.parse_args().user
 	PASS = parser.parse_args().password
 	file_link = parser.parse_args().file_url
-	
-	#try:
-	#	rapidshare, files, fileid, filename = fille_link.rsplit('/')[-4:]
-	#except ValueError:
-	#	error('Invalid link')
-	if "rapidshare.com" in file_link:
-		rsdl(file_link, USER, PASS)
-	elif "mediafire.com" in file_link:
-		mfdl(file_link)
+
+	if ".txt" in file_link and not "http://" in file_link:
+		f = open(file_link, 'r')
+		if f.read(1) == '\xef':
+			f.seek(3)
+		file_list = list(f.readlines())
+		for item in file_list:
+			checkLink(item.strip('\n'))
 	else:
-		error('Invalid or unsupported link')
+		checkLink(file_link)
 
 if __name__ == '__main__':
 	try:
