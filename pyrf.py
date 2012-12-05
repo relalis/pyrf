@@ -125,7 +125,7 @@ def rsdl(link, USER=None, PASS=None):
 			})
 	dl_params_string = urllib.urlencode(dl_params)
 	download_link = '%s://%s/cgi-bin/rsapi.cgi?%s' % (proto, server, dl_params_string)
-	downloaded_filename = download(download_link, target_filename)
+	download(download_link, target_filename)
 
 def mfdl(link):
 	conn = urllib.urlopen(link)
@@ -135,7 +135,7 @@ def mfdl(link):
 	dlink = dlink[7:-2]
 	filename = dlink.split('/')[5:]
 	say('Downloading: %s' % filename[0])
-	downloaded_filename = download(dlink, filename[0])
+	download(dlink, filename[0])
 
 def hfdl(link, USER=None, PASS=None):
 	apilink = 'http://api.hotfile.com/?action=getdirectdownloadlink'
@@ -147,7 +147,7 @@ def hfdl(link, USER=None, PASS=None):
 			error('A premium account is required to download from hotfile.')
 			return
 		say('Downloading: %s' % filename)
-		downloaded_filename = download(data, filename)
+		download(data, filename)
 
 def checkLink(link, USER=None, PASS=None):
 	if "rapidshare.com" in link:
@@ -160,6 +160,11 @@ def checkLink(link, USER=None, PASS=None):
 		else:
 			error('You need to enter a username and password for hotfile')
 			return
+	elif "http://" in link:
+		filename = link.split('/')
+		filename = filename[len(filename)-1]
+		say('Downloading: %s' % filename)
+		download(link, filename)
 	else:
 		error('Invalid or unsupported link')
 		return
