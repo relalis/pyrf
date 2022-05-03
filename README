@@ -1,7 +1,3 @@
 Usage: pyrf.py [-u login] [-p password] <mediafire/rapidshare/hotfile link>
 
-Mediafire parser is slightly outdated, so don't expect me to fix it anytime soon.
-I said no.
-Stop that!
-Ugh, don't look at me like that!
-Fine, I'll work on it later.
+This is obviously a dead project. Saved here for posterity.
